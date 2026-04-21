@@ -1,0 +1,27 @@
+---
+title: "ESM262_HW1"
+author: "Natasha Atkins and Sydney Royal"
+format: pdf
+editor: visual
+---
+
+## Assignment 1: Sierra Field Station
+
+-   summarize stream flow and NPP
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+`{#library(janitor)} library(janitor) library(tidyverse) library(ggplot2) mydata <- read.csv(p301.csv)`
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
