@@ -1,0 +1,172 @@
+---
+title: "Class Notes Functions"
+author: "Sydney Royal"
+format: html
+editor: visual
+---
+
+## Assignment
+
+Steps
+
+1.  Define the contract
+
+- in a quarto document describe inputs, outputs and what the function will do
+
+2.  Implement the function in R
+
+- power_gen_orig is a good template to start with - copy and modify
+
+- make sure you include documentation at the top for now follow style from power_gen_orig but you can be more descriptive if you want - as long as line starts with #, it is a comment and will not be executed as code
+
+- save this file as a name.R file
+
+- *hint* use factors to make it easier to count the number of individuals of each species
+
+3.  Test the function with some example data that you generate
+
+- include you test code in the quarto document
+
+# Class Notes
+
+## BOD Dataset
+
+```{r}
+# look at a R data set on Biological Oxygen Demand over time
+
+# notice the use of data - R function that brings pre-stored datasets into the work space
+data(BOD)
+
+# notice "help" and the information that it provides
+help(BOD)
+
+# options for looking at data
+View(BOD)
+
+head(BOD)
+```
+
+## Sort Function
+
+```{r}
+# example of a function - SORT
+result = sort(BOD[,"demand"], decreasing=TRUE, method="quick")
+head(result)
+```
+
+Inputs determine "what"
+
+Parameters determine "how"
+
+Contracts:
+
+- if the users give you A, the function will return with B
+
+- specify A and B as precisely as you can - should include units, parameters, time, etc.
+
+## Function format:
+
+\# descriptions at the top of the inputs, outputs, and what the function does.
+
+*Function Name* = function(inputs, parameters) {
+
+body of the function (manipulation of inputs)
+
+return(values to return)
+
+}
+
+- body= everything between {} - anything inside the body isn't shown and can be reused
+
+- return= tells R what the output was
+
+## Practice
+
+```{r}
+library(here)
+# source the function from a file - make sure you are in the right working directory
+source(here("scripts/power_gen_orig.R"))
+
+# alternatively
+# function definition in-line
+power_gen_orig = function(height, flow, rho=1000, g=9.8, Keff=0.8) {
+result = rho * height * flow * g * Keff
+return(result)
+}
+
+# note that height and flow don't have default values, so you must provide them when you use the function, but the other parameters have default values that you can overwrite if you want to
+
+
+```
+
+### How the function is used:
+
+```{r}
+# This use of the function
+power_gen_orig(20,1)
+
+```
+
+- can get the same result from specifying the parts of the function you're calling– if these aren't specified, then R assumes it's the default order that they appear in the function and you have to memorize what order they're in.
+
+```{r}
+# is the same as this
+power_gen_orig(height=20, flow=1)
+```
+
+- You can change the order of the names of the arguments if you don't want to have to worry about the order, just name the argument.
+
+```{r}
+# or this; where we use the names of the arguments to specify which is which - this is especially useful if you have a lot of arguments and don't want to remember the order
+power_gen_orig(flow=1, height=20)
+```
+
+- you can also change the default settings– so Keff has a default value of 0.8, but can be set to be something else, but that must be specified.
+
+```{r}
+# change the defaults
+# what if efficiency is less
+
+power_gen_orig(20,1, Keff=0.2)
+```
+
+## Scoping
+
+- defines where a variable can be seen
+
+```{r}
+# specifying function name without () shows code
+# try it for internal R functions
+power_gen_orig
+```
+
+```{r}
+# use the function and save the results
+reservoir1 = power_gen_orig(height=4, flow=7)
+
+reservoir2 = power_gen_orig(height=4, flow=7, Keff=0.2)
+
+# note that internal variables are not defined so these R statements will FAIL
+# try it
+height
+```
+
+```{r}
+Keff
+
+```
+
+```{r}
+results
+```
+
+- Only if outputs are defined in your workspace "reservoir1 and reservoir2"
+
+```{r}
+# only the outputs are in your workspace
+reservoir1
+```
+
+```{r}
+reservoir2
+```
