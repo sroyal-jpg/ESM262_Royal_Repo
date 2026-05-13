@@ -85,7 +85,7 @@ return(values to return)
 ```{r}
 library(here)
 # source the function from a file - make sure you are in the right working directory
-source(here("scripts/power_gen_orig.R"))
+source(here("R/power_gen_orig.R"))
 
 # alternatively
 # function definition in-line
@@ -148,16 +148,16 @@ reservoir2 = power_gen_orig(height=4, flow=7, Keff=0.2)
 
 # note that internal variables are not defined so these R statements will FAIL
 # try it
-height
+#height
 ```
 
 ```{r}
-Keff
+#Keff
 
 ```
 
 ```{r}
-results
+#results
 ```
 
 - Only if outputs are defined in your workspace "reservoir1 and reservoir2"
@@ -169,4 +169,43 @@ reservoir1
 
 ```{r}
 reservoir2
+```
+
+## Reading in Functions
+
+```{r}
+library(here)
+source(here("R/power_gen_orig.R"))
+power_gen_orig(20,1)
+```
+
+## Testing the Function I made
+
+```{r}
+
+# make a dataset
+plants <- data.frame(
+  species = c("Woodrush",
+              "Holly (seedlings)",
+              "Bramble",
+              "Yorkshire Fog",
+              "Sedge"),
+  
+  count = c(2, 8, 1, 1, 3)
+)
+
+# view dataframe
+plants
+
+
+```
+
+```{r}
+# read in the function
+
+library(here)
+source(here("R/biodiversity_function_royal.R"))
+biodiv_index(plants$count, sum(plants$count))
+
+
 ```
