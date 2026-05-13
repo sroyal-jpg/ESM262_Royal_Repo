@@ -1,0 +1,59 @@
+---
+title: "Week 2 Exercise"
+author: "Sydney Royal"
+format: html
+editor: visual
+---
+
+# Assignment
+
+-   Total annual stream flow
+
+-   Total annual precipitation
+
+-   \% of precipitation that becomes stream flow each year
+
+## Set Up
+
+```{r}
+library(here)
+library(tidyverse)
+# read in the data
+p301 = read.csv(here("data", "p301.csv"))
+
+# aggregate by water year
+p301_yearly <- p301 %>%
+  group_by(wy) %>%
+  summarise(total_streamflow = sum(streamflow),
+            total_precip = sum(precip),
+            percent_streamflow = (total_streamflow / total_precip) * 100)
+
+# calculate mean, range and standard deviation of percent streamflow across year
+mean(p301_yearly$percent_streamflow)
+```
+
+## Find Annual Stream flow
+
+```{r}
+total_streamflow<- p301_yearly|>
+  sum(streamflow)
+```
+
+## Find Annual Precipitation
+
+```{r}
+
+```
+
+## Find Annual % of Precipitation that Becomes Stream Flow
+
+```{r}
+Adding something new
+```
+
+creating a conflict from my pc
+
+creating another conflict? 
+
+creating a conflict part 2 from my pc
+
