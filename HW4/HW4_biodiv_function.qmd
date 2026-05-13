@@ -1,0 +1,29 @@
+---
+title: "Assignment 4 Functions"
+author: "Sydney Royal"
+format: html
+editor: visual
+---
+
+## Biodiversity Index Function
+
+CONTRACT
+
+inputs= number of individuals of each species (n), number of individuals of all species (N)
+
+output = biodiversity index
+
+parameters = (sum (n(n-1))) / (N((N-1)))
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
