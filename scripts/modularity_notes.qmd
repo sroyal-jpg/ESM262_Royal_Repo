@@ -1,0 +1,142 @@
+---
+title: "Modularity Notes"
+author: "Sydney"
+format: html
+editor: visual
+---
+
+## Vectors and Functions
+
+- the point of a function is to use it with multiple inputs
+
+- vector arithmetic
+
+## Example
+
+```{r}
+a= c(1,2,3)
+b= c(3,4,6)
+a+b
+
+# sum is done for each element of the vector
+# this vector airthmetic only works if the vectors are the same length
+```
+
+## We've been doing this
+
+```{r}
+# lots of situations where you can do vector arithmetic without a for loop
+
+```
+
+## Hydropower example
+
+```{r}
+
+# the function implements that model with the multiplied vectors
+library(here)
+library(tidyverse)
+# source the function from a file - make sure you are in the right working directory
+source(here("R/power_gen_orig.R"))
+power_gen_orig(flow=2,height=5)
+
+
+```
+
+```{r}
+# how we'd run it
+
+power_gen_orig(flow=2, height = 5)
+
+
+# could also make a bunch of different flows
+# Vectors of flow and height
+flow = runif(min=1, max=10, n=20)
+height = runif(min=5, max =30, n=20)
+
+power = power_gen_orig(flow, height)
+power
+
+# lots of functions will work with single and multiple values of data 
+```
+
+- you can have the same number of each of your inputs or just one of them that can be applied to all the others.
+
+- so it can work with 1 value of Keff, but can't work with 2, because it doesn't know what to do with them.
+
+- can get away without using a for loop sometimes, but not always.
+
+## Example where you have to use a for loop
+
+- NPV = net present value – a way of comparing when you have costs, or damages to handle in the future
+
+  - creates a discount rate
+
+```{r}
+# asking for NPV for damages across the discount rates
+
+# define inputs: interest rates and damages)
+
+# write the function, and then use loops to fill in the structure
+
+
+```
+
+```{r}
+# write a function to compute npv
+source(here("course-materials/R/compute_NPV.R"))
+compute_NPV
+
+
+compute_NPV(20, discount=0.01, time=20)
+
+
+
+# generate some input
+damages = c(25,33,91,24)
+damages
+
+
+
+
+```
+
+```{r}
+# now use a nested for loop to populate
+for (i in 1:length(damages)) { ////# thed fapp
+  for (j in 1:length(discount_rates)) {
+    npvs[i,j] = compute_NPV(value=damages[i], discount=discount_rates[j], time=yr)
+  }
+}
+npvs
+```
+
+```{r}
+* big picture- you get a list of damages and make for loop to n
+
+% main progam-- main module
+# main program that controls the flow
+
+# be precise about what your gol is 
+
+
+
+```
+
+Inputs:
+
+- what is the goal
+
+- key building blocks or functions
+
+- inputs and outputs
+
+- how do you put the boxes together
+
+  - after you make your flow chart, you implement as you go.
+
+Example
+
+- how much profit you will make by building
+
+- flow chart should guide your project design

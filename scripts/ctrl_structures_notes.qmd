@@ -1,0 +1,228 @@
+---
+title: "Control Structures Notes"
+author: "Sydney Royal"
+format: html
+editor: visual
+---
+
+## Setup
+
+```{r}
+library(here)
+library(tidyverse)
+
+```
+
+## Flow Control
+
+- allowing your function to do different things depending on conditions
+
+  - ex. IF then ELSE
+
+IF ELSE
+
+- a conditional statement that's TRUE or FALSE
+
+```{r}
+# if we make a =20, then we can determine something about a variable
+a = 20
+classr  = ifelse(a > 90, "high","low")
+classr
+```
+
+You can add together conditionals
+
+```{r}
+# a is less than 90, and it's something else, | means OR 
+
+a = 20
+classr  = ifelse((a > 90) & (a < 10), "good", "bad")
+classr
+
+
+# | is OR 
+
+a = 20
+classr  = ifelse((a > 90) | (a < 10), "good", "bad")
+classr
+
+```
+
+```{r}
+
+# also works with multiple values
+a = runif(min=1, max=100, n=5)
+a
+# then can rerun it and see 
+classr  = ifelse((a > 90) | (a < 10), "good", "bad")
+classr
+
+```
+
+```{r}
+# ifelse can work with vectors
+classr  = ifelse(a > 90, "high","low")
+classr
+```
+
+```{r}
+source(here("course-materials/R/summarize_diversity2.R"))
+
+flowers = sample(c("rose","peony","daisy"), replace=T, prob = c(0.1, 0.8, 0.1),size=30)
+
+summarize_diversity(flowers, index="B")$simpson
+```
+
+```{r}
+
+# = assigns a value
+# == tests whether something is equal to a value
+
+# for example: flowers = sample ... 
+## says that flowers is a specific thing
+
+# but if I did === B
+## then it finds if it fits in with what B is, it's not definite
+
+```
+
+## Multiple Conditions
+
+```{r}
+# creates 3 options by embedding an if statement 
+# if a is greater than 10 (false, then low), if that's true is it greater than 50? if that's false, it's meduim, if it's true it's high
+
+
+classr = ifelse((a>10), ifelse(a>50, "high","med"),"low")
+```
+
+```{r}
+
+# what do you do if your choice isn't binary?
+# case_when is a little bit cleaner to work with multiple ocnditions
+
+# what you do without case_when
+# fish are being graded
+# steelhead are A
+# tuna are B
+# everything else is C
+
+# with case_when, you give a list of conditions and then have a response
+
+# fish are set as equal to steelhead
+fish = "steelhead"
+
+# first condition is if it's equal to steelhead ~ what we want it to be if it's steelhead, then if fish == "tuna" ~ make it B, if it's not tuna (!) AND (&) not steelhead, ~ then it's C
+case_when((fish =="steelhead")  ~ "A", (fish =="tuna") ~ "B", !(fish == "tuna") & !(fish=="steelhead") ~ "C")
+
+
+```
+
+## Make this cleaner
+
+Usually we should make a function in a separate R file, but for kicks we'll do it here
+
+```{r}
+
+# apply to all of our ocean
+# start by making a function - this will be cleaner!
+
+# function called classify fish and we want to know what type of fish it is
+classify_fish = function(fish) {
+  
+  # between brackets is whatever you want the function to do, so just repeat the same case_when statement we just did
+ class=  case_when((fish =="steelhead")  ~ "A", (fish =="tuna") ~ "B", !(fish == "tuna") & !(fish=="steelhead") ~ "C")
+ 
+ # have it give you the class of the fish
+ return(class) }
+
+classify_fish("steelhead")
+
+```
+
+```{r}
+# can now give it a whole ocean
+
+ocean= sample(c("tuna","salmon","steelhead"))
+
+classify_fish(ocean)
+
+
+```
+
+Designing a function
+
+- what are the inputs and what are the outputs
+
+Inputs
+
+- nutrient concentration for at least 5 days
+
+- temperature for at least 5 days
+
+- thresholds for temperature and nutrient with default values
+
+Outputs
+
+- mean concentration
+
+- pollution risk as low, med, or high
+
+```{r}
+source(here("R/classify_lake.R"))
+
+# generate some data to try the function
+temperature = runif(min=4, max=35, n=30)
+nutrient = runif(min=5, max=40, n=30)
+
+# try it
+res=classify_lake(temperature=temperature, nutrient=nutrient)
+
+# lets pick some numbers we know should give us a low value
+nutrient = runif(min=0, max=5, n=30)
+classify_lake(temperature=temperature, nutrient=nutrient)
+
+```
+
+## Error Checking
+
+- something you do for the user of your function
+
+```{r}
+
+data = c("a","b")
+mean(data)
+
+# R returns a message because it can't make a mean of string data
+
+# should give direction to the user to have some checks in the function that return messages
+# helps you debug your own code
+
+# having some error checking to make sure the input data is reasonable for example:
+# if temperature < -100 or >100
+# set results to NA or you could exit the function with a warning
+
+
+```
+
+## Example of error checking
+
+```{r}
+
+power_gen = function(height, flow, rho=1000, g=9.8, Keff=0.8) {
+  # make sure inputs are positive and if not set as NA so result will be NA
+   if (height < 0) height=NA
+  
+ # an alterative is to exit the function prematurely - a better way to check instead of above
+  if (flow < 0) return("Flow cannot be less than 0")
+  #    return("Height cannot be less than 0")
+   # if this ends up being true, then it just stops with this return
+      
+  # calculate power
+    result = rho * height * flow * g * Keff
+  return(result)
+}
+
+power_gen(2,3)
+
+```

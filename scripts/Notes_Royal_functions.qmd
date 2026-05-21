@@ -29,6 +29,14 @@ Steps
 
 # Class Notes
 
+## Package loading
+
+```{r}
+library(here)
+library(ggplot2)
+library(tidyverse)
+```
+
 ## BOD Dataset
 
 ```{r}
@@ -203,9 +211,171 @@ plants
 ```{r}
 # read in the function
 
-library(here)
 source(here("R/biodiversity_function_royal.R"))
 biodiv_index(plants$count, sum(plants$count))
 
+
+```
+
+# Functions Part 2
+
+### Next Week
+
+- We'll start building a project with multiple functions in it
+
+### Returning Values in a Function
+
+- return(value) to get back one value, and use lists to get more than one
+
+Lists
+
+- informal data structures in R – ex. could include a table where the number of rows is different for each column, can have numeric, characters, and factors all together
+
+```{r}
+# make a list
+
+# trying to keep track of things happening at a market
+# use keyword list to tell R we're making a list
+# an element called id that's 2, there's a character variable that's high, and there's a content column with apple and cherry, and there's a cost
+
+
+sale = list(id=2, quality="high", contents=c("apple","cherry"), cost=c(4,5))
+sale
+
+
+# gives you the same dstructure as your dataframe, but the columns don't have to have the same number of things
+
+# how do we access parts of the list?
+```
+
+```{r}
+#ways to access elements
+sale$id
+
+# using $ can get you access to the parts in the list
+
+# if we were in a dataframe we would use df[1,2]
+
+# you can do this sort of with a list by doing nameoflist[#item in the list]
+sale[2]
+
+# double square brackets makes sure that you get the data inside the element, while one [] is used for things that are not lists
+sale[[4]]
+
+# this shouldn't usually work, but it does
+sale[4]
+
+# say we want to access the 2nd fruit that was sold from the sale
+sale$contents[2]
+
+# could also do with like this
+sale[[3]][2]
+
+
+# and then by using the [[]] you can do things with the values inside the list
+sale[[1]][[1]]*sale[[4]][[2]]
+
+```
+
+### Add something to a list
+
+```{r}
+# you can also just add anything to a list
+
+sale$location = "famer's market"
+
+sale
+```
+
+```{r}
+ # build a function that returns that maximum and minumim of a list of numbers
+
+# a function that returns the max and min of a vector of numbers
+
+# make a function called minmax, it's gonna have vector thing in it, x. You'll get the minimum value of x and then you'll get the maximum value of x. Then you ask it to return the min and max with each of the values named
+minmax = function(x) {
+  minx = min(x)
+  maxx = max(x)
+  
+  # if i didn't do min= max= then i wouldn't see those named as min and max
+  return(list(min=minx, max=maxx))
+}
+
+minmax(c(3,5,2,8,1))
+
+# if i made a 
+
+```
+
+## More complex example
+
+```{r}
+# Source the function
+source(here("R/analyze_water_quality.R"))
+
+# --- Use defaults (most common case) ---
+results <- analyze_water_quality(ph = 7.2, dissolved_oxygen = 8.5, turbidity = 2.1)
+results
+
+
+# if i want a value to be different than the default I can overwrite it
+
+# --- Override one limit, e.g. stricter turbidity standard for drinking water ---
+results_strict <- analyze_water_quality(
+  ph = 7.2, dissolved_oxygen = 8.5, turbidity = 2.1,
+  turbidity_max = 1.0
+)
+results_strict
+```
+
+## Redo the biodiversity index to invert it
+
+- regular index -1
+
+```{r}
+
+plants <- data.frame(
+  species = c("Woodrush",
+              "Holly (seedlings)",
+              "Bramble",
+              "Yorkshire Fog",
+              "Sedge"),
+  
+  count = c(2, 8, 1, 1, 3)
+)
+
+# view dataframe
+plants
+
+# now inverse the function -- try from this side instead of from the function itself
+
+source(here("R/biodiversity_function_royal.R"))
+1-biodiv_index(plants$count, sum(plants$count))
+
+```
+
+```{r}
+
+# I can make the probabilities different for a created sample -- just keep this in your back pocket
+possible.vampires =c("lena", "dracula", "buffy", "ambrose", size=100, prob =c(0.05, 0.05, 0.07, 0.02), replace=TRUE)
+
+
+# repeat with a list
+source(here("R/biodiversity_function_royal.R"))
+
+# lets compare two catches - with different levels of diversity
+possible.fish =c("salmon","steelhead","shark","tuna","cod")
+
+# we can control sample probablities as long as it sums to 1 - here we have a mix of fish but cod is most common
+
+# to do this we assign probabities to each fish 
+# high prob more likely to be sampled
+# probabilities must sum to 1 
+catch1 = sample(possible.fish, size=10, prob = c(0.2, 0.2, 0.1, 0.1, 0.4), replace=T)
+
+# lets create a test case that should have low diversity, making most fish steelhead
+catch2 = sample(possible.fish, size=10, prob = c(0.1, 0.7, 0.1, 0.1, 0.1), replace=T)
+
+summarize_diversity
 
 ```

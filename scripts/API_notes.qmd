@@ -1,0 +1,345 @@
+---
+title: "API Notes"
+author: "Sydney Royal"
+format: html
+editor: visual
+---
+
+## APIs
+
+- a way to automate pulling information from the web
+
+**How it works:**
+
+- send a request: looks like an R list
+
+{
+"city": "Santa Barbara",
+"temperature": 18.4,
+"humidity": 72,
+"conditions": "partly cloudy",
+"wind": {
+"speed": 3.2,
+"direction": "WSW"
+}
+}
+
+- don't need to learn JSON, because R can turn this into a recognizable dataframe
+
+- instructions are provided to make an API key, but you don't need it for this class
+
+```{r}
+# We'll use 2 packages 
+
+# sending HTTP requests
+#install.packages("httr2")
+
+# parson JSON into R objects
+#install.packages("jsonlite")
+
+library(httr2)
+library(jsonlite)
+library(tidyverse)
+```
+
+### Standard API Workflow
+
+- find the API
+
+- build a request – use *request* and *req_url_query*
+
+- send it
+
+- parse the response
+
+# Example 1: Air Quality
+
+**API documentation:**
+
+- important because it tells you the name of the things you can download – when you build a request you have to ask for exactly what you want to call.
+
+- this is where you get the names of the data that you're going to build into your request
+
+```{r}
+
+# let's get hourly PM 2.5 data for Santa Barbara
+# could automate the script to grab data from a site daily, so for example if you wanted air quality data for a single day, you would automate it instead of telling the user to download new data every day.
+
+# Build the request URL
+# can be either <- or =, doesn't matter 
+# give it the name of the website
+req <- request("https://air-quality-api.open-meteo.com/v1/air-quality")  %>%
+  # this is the building of the query itself- what you want to get 
+  req_url_query(
+    # list some of the parameters that I need to give the API want
+    # ask for data for a specific lat and long
+    latitude  = 34.42,
+    longitude = -119.70,
+    # this particular API needs to be hourly data
+    hourly    = "pm10",
+    hourly = "pm2_5",
+    # get it for the past 3 days
+    past_days = 3       # last 3 days of data
+  )
+
+# what the variables for each request are going to be different for each API, but the API website will tell you what they are. 
+
+# Send the request and parse the response
+# save the response that's = to the request (again can either be <- or =), then it will return the request
+resp <- req %>% req_perform()
+# it returns stuff in a complicated JSON format
+
+# what is this
+# gives a little more information about it, and explains the response
+attributes(resp)
+
+str(resp)
+
+# Convert  to an R list
+# the simplifyVector to format NA's usually what you want
+
+# gives you something that is more readable to R
+# calling it aq_raw, build the response, put the body from the JSON structure into the response
+aq_raw <- resp %>% resp_body_json(simplifyVector = TRUE)
+
+# What did we get back?
+names(aq_raw)
+# now looks more like what we expect
+
+# Step 2 — What's inside a key?
+str(aq_raw$hourly)          # compact overview of structure
+# you can see what's inside hourly
+
+length(aq_raw$hourly$pm2_5) # how many values?
+
+
+
+```
+
+## **Make a data frame**
+
+```{r}
+
+# Extract what you need to a data frame
+aq_df <- data.frame(
+  # turn time into a POSIX data format
+  
+  # POSIX is a standardized way of representing time data
+  # unlist takes it out of the list and takes out hourly and time 
+  # says this is how you should interpret this date, then you can do calculations with this information and find the time the data was collected.
+  time  = as.POSIXct(unlist(aq_raw$hourly$time), format = "%Y-%m-%dT%H:%M"),
+  
+  # again unlists and puts it into your dataframe
+  pm10 = unlist(aq_raw$hourly$pm10),
+  pm2_5 = unlist(aq_raw$hourly$pm2_5)
+)
+
+head(aq_df)
+
+```
+
+**Find the Mean PM10**
+
+```{r}
+
+pm_10_mean<- mean(aq_df$pm10)
+
+pm_2_5_mean<- mean(aq_df$pm2_5)
+
+
+```
+
+## **Make a Graph**
+
+```{r}
+ggplot(aq_df, aes(x = time, y = pm2_5)) +
+  geom_line(colour = "steelblue") +
+  geom_hline(yintercept = 12, linetype = "dashed", colour = "orange") +
+  annotate("text", x = min(aq_df$time), y = 13.5,
+           label = "EPA annual standard (12 µg/m³)",
+           hjust = 0, size = 3, colour = "orange") +
+  labs(
+    title = "PM2.5 Air Quality — Santa Barbara",
+    x     = "Time",
+    y     = "PM2.5 (µg/m³)"
+  ) +
+  theme_minimal()
+```
+
+## Adding variables you want
+
+```{r}
+
+# build a query in the same way we did before 
+# you CANNOT have spaces after the comma
+# same as before but with forecast days added
+
+# Build the request URL
+req <- request("https://air-quality-api.open-meteo.com/v1/air-quality")  %>%
+  req_url_query(
+    latitude  = 34.42,
+    longitude = -119.70,
+    # for the data in hourly you have to put the quotes with no spaces
+    hourly    = "pm2_5,ozone",  # we can ask for multiple variables at once, you can't have spaces!!
+    past_days = 3,  # last 3 days of data
+    forecast_days = 6 # add forecase days
+  )
+
+# Send the request and parse the response
+resp <- req %>% req_perform()
+
+# what is this
+attributes(resp)
+
+# Convert  to an R list
+aq2_raw <- resp %>% resp_body_json(simplifyVector = TRUE)
+
+# What did we get back?
+names(aq2_raw)
+
+names(aq2_raw$hourly)
+
+# Step 2 — What's inside a key?
+names(aq_raw$hourly)          # compact overview of structure
+
+# how many values?
+length(aq2_raw$hourly$pm2_5) 
+
+# puts ozone back into the list
+length(aq2_raw$hourly$ozone)
+
+# compare with previous call - longer time
+# because we added forecast days
+length(aq_raw$hourly$pm2_5)
+
+```
+
+**Turn into a dataframe again**
+
+```{r}
+
+# Extract what you need to a data frame
+aq_df2 <- data.frame(
+  # turn time into a POSIX data format
+  time  = as.POSIXct(unlist(aq2_raw$hourly$time), format = "%Y-%m-%dT%H:%M"),
+  pm2_5 = unlist(aq2_raw$hourly$pm2_5),
+  # add ozone to the data frame
+  ozone = unlist(aq2_raw$hourly$ozone)
+)
+
+head(aq_df2)
+
+```
+
+**Graph it**
+
+```{r}
+
+ggplot(aq_df2, aes(x = ozone, y = pm2_5)) +
+  geom_point(colour = "steelblue") +
+  labs(
+    title = "Ozone vs PM2.5 Air Quality — Santa Barbara",
+    x     = "Ozone (µg/m³)",
+    y     = "PM2.5 (µg/m³)"
+  ) +
+  theme_minimal()
+
+```
+
+## Writing a Reusable API
+
+```{r}
+
+# if you want to get PM 2.5 specifically, you can make a function that asks for the lat and long for a certain number of days 
+get_pm25 <- function(lat, lon, past_days = 7) {
+  
+  # Error checking -- makes sure the inputs are right
+  ## | means or
+  ## & means and -- therefore both conditions have to be true
+  if (lat < -90 | lat > 90) {
+    
+    # this is the message you get 
+    # can do stop("Latitude must be between -90 and 90.") -- to actually stop the running and tell it to give the user a warning
+    return("Latitude must be between -90 and 90.")
+  }
+  if (lon < -180 | lon > 180) {
+    return("Longitude must be between -180 and 180.")
+  }                                                    # ← added this
+  
+  # there are 2 more functions in R called "stop" and "warning" 
+  ## a clearer way to do error checking
+  # stop just stops it from running
+  ## you can do it with return, but sometimes it can get confused between that being the name of a function you're working with. 
+  
+  req <- request("https://air-quality-api.open-meteo.com/v1/air-quality") |>
+    req_url_query(
+      latitude  = lat,
+      longitude = lon,
+      
+      # pm2_5 is manually put in by the user
+      hourly    = "pm2_5",
+      past_days = past_days
+    )
+  resp <- req |> req_perform()
+  raw  <- resp |> resp_body_json(simplifyVector = TRUE)
+  
+  # converts it into a dataframe
+  data.frame(
+    lat   = lat,
+    lon   = lon,
+    time  = as.POSIXct(unlist(raw$hourly$time), format = "%Y-%m-%dT%H:%M"),
+    pm2_5 = unlist(raw$hourly$pm2_5)
+  )
+}
+# the last thing in the function is returned automatically 
+
+```
+
+## Can use the function with multiple locations
+
+```{r}
+
+# Define several CA coastal cities
+locations <- data.frame(
+  city = c("Santa Barbara", "Ventura", "San Luis Obispo"),
+  lat  = c(34.42,           34.27,     35.28),
+  lon  = c(-119.70,         -119.29,   -120.66)
+)
+
+# Use for loop to call our function for each row
+
+for (i in 1:nrow(locations)) {
+  city <- locations$city[i]
+  lat  <- locations$lat[i]
+  lon  <- locations$lon[i]
+  
+  # for each case it's going to run the function for the data and then puts it into a dataframe
+  aq_df <- get_pm25(lat, lon, past_days = 3)
+  aq_df$city <- city
+  
+  if (i == 1) {
+    aq_all <- aq_df
+  } else {
+    aq_all <- bind_rows(aq_all, aq_df)
+  }
+}
+
+
+# Daily averages by city
+aq_daily <- aq_all %>%
+  mutate(date = as.Date(time)) %>%
+  group_by(city, date) %>%
+  summarize(mean_pm2_5 = mean(pm2_5, na.rm = TRUE), .groups = "drop")
+
+ggplot(aq_daily, aes(x = date, y = mean_pm2_5, colour = city)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  labs(
+    title  = "Daily Mean PM2.5 — Central Coast Cities",
+    x      = "Date",
+    y      = "PM2.5 (µg/m³)",
+    colour = "City"
+  ) +
+  theme_minimal()
+
+```

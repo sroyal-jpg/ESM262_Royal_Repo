@@ -18,5 +18,32 @@ biodiv_index = function(species, total) {
   (total * (total-1))
  
    return(result)
+  
+}
+  
+  ############ DO NOT TOUCH ############
+  
+  # new additions to have it return specific results
+
+  biodiv_index = function(species, total) {
+    
+    result = sum(species * (species - 1)) / 
+      (total * (total-1))
+    
+    return(result)
+  
+}
+
+biodiv_index = function (species, total) 
+{
+  species = as.factor(species)
+  total = as.factor(total)
+  diversity = 1 - sum(tmp)
+  nspecies = length(summary(species))
+  tmp = which.max(summary(species))
+  dominant = names(summary(species)[tmp])
+  return(list(num = nspecies, simpson = diversity, dominant = dominant))
+
+
 }
 
