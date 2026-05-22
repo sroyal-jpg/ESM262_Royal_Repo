@@ -13,16 +13,7 @@ editor: visual
 
 - send a request: looks like an R list
 
-{
-"city": "Santa Barbara",
-"temperature": 18.4,
-"humidity": 72,
-"conditions": "partly cloudy",
-"wind": {
-"speed": 3.2,
-"direction": "WSW"
-}
-}
+{ "city": "Santa Barbara", "temperature": 18.4, "humidity": 72, "conditions": "partly cloudy", "wind": { "speed": 3.2, "direction": "WSW" } }
 
 - don't need to learn JSON, because R can turn this into a recognizable dataframe
 
